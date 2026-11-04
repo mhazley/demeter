@@ -31,9 +31,6 @@ services:
         /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data
         "json={\"listen_port\":{{PORT}},\"current_network_interface\":\"{{VPN_INTERFACE}}\",\"random_port\":false,\"upnp\":false}"
         http://127.0.0.1:8080/api/v2/app/setPreferences'
-      # Built-in HTTP proxy so Prowlarr can reach indexers your ISP blocks
-      HTTPPROXY: "on"
-      HTTPPROXY_LISTENING_ADDRESS: ":8888"
     ports:
       - 8080:8080   # qBittorrent WebUI
       - 9696:9696   # Prowlarr
