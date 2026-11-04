@@ -95,3 +95,38 @@ services:
       - /data:/data
     ports:
       - 7878:7878
+
+  jellyfin:
+    <<: *common
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    volumes:
+      - ./config/jellyfin:/config
+      - /data/media:/data/media:ro
+    devices:
+      - /dev/dri:/dev/dri   # Intel UHD 630 -> QSV/VAAPI hardware transcoding
+    ports:
+      - 8096:8096
+
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    init: true
+    container_name: seerr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}
+    ports:
+      - 5055:5055
+    volumes:
+      - ./config/seerr:/app/config
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/settings/public || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    security_opt:
+      - no-new-privileges
+    cap_drop:
+      - ALL
+    restart: unless-stopped
