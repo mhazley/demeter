@@ -8,7 +8,7 @@ x-common: &common
  
 services:
   gluetun:
-    image: qmcgaw/gluetun:latest
+    image: qmcgaw/gluetun:v3.41.3
     container_name: gluetun
     restart: unless-stopped
     cap_add: [NET_ADMIN]
@@ -22,6 +22,7 @@ services:
       VPN_TYPE: wireguard
       WIREGUARD_PRIVATE_KEY: ${PROTON_WG_PRIVATE_KEY}
       SERVER_COUNTRIES: ${PROTON_SERVER_COUNTRIES}
+      SERVER_CITIES: ${PROTON_SERVER_CITIES}
       # Proton P2P port forwarding (needs a paid plan + NAT-PMP enabled on the WG config)
       VPN_PORT_FORWARDING: "on"
       PORT_FORWARD_ONLY: "on"          # only pick servers that support PF
