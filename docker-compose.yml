@@ -128,3 +128,44 @@ services:
     cap_drop:
       - ALL
     restart: unless-stopped
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest   # pin a release tag once it works
+    container_name: homepage
+    restart: unless-stopped
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+      # Every hostname:port you'll open it on. Requests with any other Host header are rejected.
+      HOMEPAGE_ALLOWED_HOSTS: matt-server.taila090da.ts.net:3000,server.matthazley.com:3000
+      # Secrets come from .env and are substituted into services.yaml as {{HOMEPAGE_VAR_...}}
+      HOMEPAGE_VAR_SONARR_KEY: ${SONARR_API_KEY}
+      HOMEPAGE_VAR_RADARR_KEY: ${RADARR_API_KEY}
+      HOMEPAGE_VAR_PROWLARR_KEY: ${PROWLARR_API_KEY}
+      HOMEPAGE_VAR_JELLYFIN_KEY: ${JELLYFIN_API_KEY}
+      HOMEPAGE_VAR_SEERR_KEY: ${SEERR_API_KEY}
+      HOMEPAGE_VAR_QBIT_USER: ${QBIT_USER}
+      HOMEPAGE_VAR_QBIT_PASS: ${QBIT_PASS}
+      HOMEPAGE_VAR_GLUETUN_KEY: ${GLUETUN_CONTROL_KEY}
+    volumes:
+      - ./config/homepage:/app/config
+      - /data:/app/data:ro      # only so the disk widget can report NVMe usage
+    ports:
+      - 3000:3000
+    depends_on: [socket-proxy]
+
+  # Read-only, filtered Docker API so Homepage can show container status
+  # without getting the raw docker socket (which is root on the host).
+  socket-proxy:
+    image: lscr.io/linuxserver/socket-proxy:latest
+    container_name: socket-proxy
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      POST: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    read_only: true
+    tmpfs:
+      - /run
